@@ -64,7 +64,7 @@ def end_of_day(year, month, day):
 
 
 def period_middle(start, end):
-    return start + (end - start) / 2
+    return start + (end - start) // 2
 
 
 def js_timestamp(adate):
