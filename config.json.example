@@ -1,0 +1,7 @@
+{
+	"mongo_url": "mongodb://localhost:27017/",
+	"mongo_database": "rapidpro",
+	"server_url": "https://api.rapidpro.io/api/v1",
+	"api_token": null,
+	"relayers_unicode": false
+}

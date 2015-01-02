@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>UReport Mali SMS Dashboard</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <style type="text/css">
+    	body {
+    		font-size: 2.5em;
+    	}
+    	.orange { color: #ff6600; }
+    	.malitel { color: #007ac2; }
+    	.table * th, .table * td {
+    		vertical-align: middle !important;
+    	}
+    	td { text-align: center; }
+    	.graph { width: 100%; }
+    	.title-line { cursor: pointer; }
+    	.pie { width: 50px; height: 50px; }
+    	.important { font-weight: bold; }
+	</style>
+  	</head>
+	<body>
+	<script type="text/javascript">
+	var hc_colors = ['#ff6600', '#007ac2', '#7cb5ec', '#434348', '#90ed7d', '#f7a35c', '#8085e9', 
+					 '#f15c80', '#e4d354', '#8085e8', '#8d4653', '#91e8e1']
+	var charts = {}; var pie_charts = {};</script>
+	<div class="container">
+
+		<table class="table table-bordered">
+		<legend>Statistiques SMS pour U-report Mali (36019) – <small>{{ update_time }}</small></legend>
+
+		{% for monthkey, month in months_data.items() %}
+    	<tr id="title-{{ monthkey }}" class="title-line">
+    		<th>{{ month.name }}</th>
+            {% for relayer_id, relayer in relayers.items() %}
+                <td class="{{ relayer_id|relayer_css }}">{{ month.stats.nb_sms_total[relayer_id] }}</td>
+            {% endfor %}
+        </tr>
+        <tr id="content-{{ monthkey }}" class="content-line" style="display: none;">
+        <td colspan="3">
+        	<table class="table table-bordered table-condensed table-striped ">
+        		<tr>
+        			<td></td>
+        			{% for relayer_id, relayer in relayers.items() %}
+        			<td class="{{ relayer_id|relayer_css }}">{{ relayer.name }}</td>
+        			{% endfor %}
+        			<td>%</td>
+        			<td>Total</td>
+        		</tr>
+            	{% for field, label in fields.items() %}
+            	<tr>
+            		<script type="text/javascript">pie_charts['{{monthkey}}-{{ field}}'] = [];</script>
+					<th class="line-label">{{ label }}</th>
+					{% for relayer_id, relayer in relayers.items() %}
+						<td class="{{ relayer_id|relayer_css }}">{{ month.stats[field][relayer_id]|amount }}</td>
+						<script type="text/javascript">
+							pie_charts['{{monthkey}}-{{ field}}'].push(["{{ relayer.name }}", {{ month.stats[field].percent[relayer_id] }}]);
+						</script>
+					{% endfor %}
+					<td class="pie" data-toggle="tooltip" data-placement="top" title="{% for relayer_id, relayer in relayers.items() %}{{ relayer.name }}: {{ month.stats[field].percent[relayer_id]|percent }} {% endfor %}">
+						<div id="pie-{{ monthkey }}-{{ field }}" class="pie"></div></td>
+					<td {% if field in amount_fields %}class="important"{% endif %}>{{ month.stats[field].total|amount }}{% if field in amount_fields %} F CFA{% endif %}</td>
+				</tr>
+            	{% endfor %}
+            </table>
+
+            <div id="graph-{{ monthkey}}" class="graph"></div>
+            {% if monthkey != 'total' %}
+            	<script type="text/javascript">
+            		charts['{{ monthkey }}'] = {
+            			slug: '{{ monthkey }}',
+            			data: {
+            				'nb_sms_total_orange': [],
+            				'nb_sms_in_orange': [],
+            				'nb_sms_out_orange': [],
+            				'nb_sms_total_malitel': [],
+            				'nb_sms_in_malitel': [],
+            				'nb_sms_out_malitel': [],
+            			}
+            		}
+
+		            {% for day_key, day_data in daily_data[monthkey].items() %}
+		            	{% set o_nb_sms_total = day_data['stats'].nb_sms_total[orange_key] %}
+		            	{% set o_nb_sms_in = day_data['stats'].nb_sms_in[orange_key] %}
+		            	{% set o_nb_sms_out = day_data['stats'].nb_sms_out[orange_key] %}
+		            	{% set m_nb_sms_total = day_data['stats'].nb_sms_total[malitel_key] %}
+		            	{% set m_nb_sms_in = day_data['stats'].nb_sms_in[malitel_key] %}
+		            	{% set m_nb_sms_out = day_data['stats'].nb_sms_out[malitel_key] %}
+		            	charts['{{ monthkey }}'].data.nb_sms_total_orange.push([{{ day_data.middle_ts}}, {{ o_nb_sms_total }} ]);
+		            	charts['{{ monthkey }}'].data.nb_sms_in_orange.push([{{ day_data.middle_ts}}, {{ o_nb_sms_in }} ]);
+		            	charts['{{ monthkey }}'].data.nb_sms_out_orange.push([{{ day_data.middle_ts}}, {{ o_nb_sms_out }} ]);
+		            	charts['{{ monthkey }}'].data.nb_sms_total_malitel.push([{{ day_data.middle_ts}}, {{ m_nb_sms_total }} ]);
+		            	charts['{{ monthkey }}'].data.nb_sms_in_malitel.push([{{ day_data.middle_ts}}, {{ m_nb_sms_in }} ]);
+		            	charts['{{ monthkey }}'].data.nb_sms_out_malitel.push([{{ day_data.middle_ts}}, {{ m_nb_sms_out }} ]);
+		            {% endfor %}
+            	</script>
+            {% else %}
+            	<script type="text/javascript">
+            		charts['{{ monthkey }}'] = {
+            			slug: '{{ monthkey }}',
+            			data: {
+            				'nb_sms_total_orange': [],
+            				'nb_sms_in_orange': [],
+            				'nb_sms_out_orange': [],
+            				'nb_sms_total_malitel': [],
+            				'nb_sms_in_malitel': [],
+            				'nb_sms_out_malitel': [],
+            			}
+            		}
+
+		            {% for day_key, day_data in cumulative.items() %}
+		            	{% set o_nb_sms_total = day_data['stats'].nb_sms_total[orange_key] %}
+		            	{% set o_nb_sms_in = day_data['stats'].nb_sms_in[orange_key] %}
+		            	{% set o_nb_sms_out = day_data['stats'].nb_sms_out[orange_key] %}
+		            	{% set m_nb_sms_total = day_data['stats'].nb_sms_total[malitel_key] %}
+		            	{% set m_nb_sms_in = day_data['stats'].nb_sms_in[malitel_key] %}
+		            	{% set m_nb_sms_out = day_data['stats'].nb_sms_out[malitel_key] %}
+		            	charts['{{ monthkey }}'].data.nb_sms_total_orange.push([{{ day_data.middle_ts}}, {{ o_nb_sms_total }} ]);
+		            	charts['{{ monthkey }}'].data.nb_sms_in_orange.push([{{ day_data.middle_ts}}, {{ o_nb_sms_in }} ]);
+		            	charts['{{ monthkey }}'].data.nb_sms_out_orange.push([{{ day_data.middle_ts}}, {{ o_nb_sms_out }} ]);
+		            	charts['{{ monthkey }}'].data.nb_sms_total_malitel.push([{{ day_data.middle_ts}}, {{ m_nb_sms_total }} ]);
+		            	charts['{{ monthkey }}'].data.nb_sms_in_malitel.push([{{ day_data.middle_ts}}, {{ m_nb_sms_in }} ]);
+		            	charts['{{ monthkey }}'].data.nb_sms_out_malitel.push([{{ day_data.middle_ts}}, {{ m_nb_sms_out }} ]);
+		            {% endfor %}
+            	</script>
+        	{% endif %}
+        	</td>
+        	</tr>
+      {% endfor %}
+      </table>
+    </div>
+	</body>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+	<script src="http://code.highcharts.com/highcharts.js"></script>
+	<script>
+        $(function () {
+        	function displayRow(key) {
+        		$('#content-' + key).show();
+
+        		if (!$('#graph-' + key).hasClass('hc_ready')) {
+        			buildChartFor(key);
+					$('#graph-' + key).addClass('hc_ready');
+        		}
+        	}
+
+        	// click on row hides all and open clicked
+        	$('.title-line').on('click', function (e) {
+        		var mid = $(this).attr('id').replace('title-', '');
+
+        		// hide all rows
+        		$('.content-line').hide();
+
+        		// display appropriate row
+        		displayRow(mid);
+        	});
+
+        	function getHCOptionsFor(key) {
+        		try {
+        			var chart = charts[key];
+        		} catch (e) {
+        			console.log("No chart data for " + key);
+        			return {};
+        		}
+        		var chart_type = (key == 'total') ? 'areaspline' : 'spline';
+        		var bd_visible = !(key == 'total');
+        		return {
+		            chart: { type: chart_type, renderTo: 'graph-' + chart.slug },
+		            title: { text: null },
+		            xAxis: { type: 'datetime' },
+		            yAxis: { title: { text: null } },
+		            tooltip: { valueSuffix: null },
+		            colors: hc_colors,
+		            legend: {},
+		            series: [
+		            	{name: "SMS Total Orange", data: chart.data.nb_sms_total_orange },
+		            	{name: "SMS Total Malitel", data: chart.data.nb_sms_total_malitel },
+		            	{name: "SMS Sortants Orange", data: chart.data.nb_sms_out_orange, visible: bd_visible },
+		            	{name: "SMS Sortants Malitel", data: chart.data.nb_sms_out_malitel, visible: bd_visible },
+		            	{name: "SMS Entrants Orange", data: chart.data.nb_sms_in_orange, visible: bd_visible },
+		            	{name: "SMS Entrants Malitel", data: chart.data.nb_sms_in_malitel, visible: bd_visible }
+                    ],
+		            credits: { enabled: false }
+	        	}
+        	}
+
+        	function buildChartFor(key) {
+        		console.log("Creating HighCharts for " + key);
+        		try {
+        			return new Highcharts.Chart(getHCOptionsFor(key));
+        		} catch(e) {
+        			console.error("Failed to create HC for " + key);
+        		}
+        	}
+
+        	// start with total opened
+        	displayRow('total');
+
+        	var pie_tmpl = {
+	    		chart: { backgroundColor: 'transparent',
+	    				 plotBorderWidth: null,
+            			 plotShadow: false,
+            			 // width: 20,
+            			 // height: 20 },
+            			 spacingBottom: 0,
+            			 spacingTop: 0,
+            			 spacingLeft: 0,
+            			 spacingRight: 0,
+
+            			},
+	            title: { text: null },
+	            tooltip: { enabled: false },
+	            plotOptions: {
+	                pie: { allowPointSelect: false,
+	                	   colors: hc_colors,
+                    	   cursor: null,
+                    	   enableMouseTracking: false,
+                    	   dataLabels: { enabled: false },
+                    	   showInLegend: false,
+                    	   borderWidth: null,
+                    	    }
+	            },
+	            series: [{
+	                type: 'pie',
+	                data: []
+	            }],
+	            credits: { enabled: false }
+        	};
+
+        	// build HC for pie percentages
+        	$.each(pie_charts, function (index, pie_chart) {
+        		var opt = pie_tmpl;
+        		opt.series[0].data = pie_chart;
+        		$('#pie-' + index).highcharts(opt);
+        	});
+
+		});
+</script>
+
+</html>
