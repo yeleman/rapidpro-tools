@@ -9,7 +9,7 @@ import json
 from collections import OrderedDict
 import locale
 
-from py3compat import text_type
+from py3compat import text_type, PY2
 from docopt import docopt
 from jinja2 import Environment, FileSystemLoader
 
@@ -194,7 +194,10 @@ def main(arguments):
     # render template in file
     template = jinja_env.get_template('dashboard_tmpl.html')
     with open(html_path, 'w') as f:
-        f.write(template.render(**context))
+        html = template.render(**context)
+        if PY2:
+            html = html.encode('utf-8')
+        f.write(html)
 
 
 if __name__ == '__main__':
