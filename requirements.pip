@@ -1,11 +1,8 @@
 Jinja2==2.7.3
-MarkupSafe==0.23
 docopt==0.6.2
-gnureadline==6.3.3
 ipdb==0.8
 ipython==2.3.1
 iso8601==0.1.10
 mongo==0.2.0
 py3compat==0.2
-pymongo==2.7.2
 requests==2.5.1
