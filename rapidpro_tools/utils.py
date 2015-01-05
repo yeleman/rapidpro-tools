@@ -136,3 +136,57 @@ def get_api_data(url_or_path, **params):
         raise
     else:
         return r.json()
+
+
+def post_api_data(url_or_path, payload):
+    headers = {'Authorization': "Token {}".format(CONFIG.get("api_token")),
+               'Content-type': 'application/json'}
+    if url_or_path.startswith('http'):
+        url = url_or_path
+    else:
+        url = "{server}{path}" \
+              .format(server=CONFIG.get('server_url'), path=url_or_path)
+    logger.debug("URL: {}".format(url))
+    try:
+        r = requests.post(url=url, headers=headers,
+                          data=json.dumps(payload), timeout=6)
+        assert r.status_code in (200, 201)
+    except AssertionError:
+        if r.status_code in (403, 401):
+            logger.error(
+                "Received {code} HTTP status code. Most likely "
+                "a wrong API TOKEN in config ({token})."
+                .format(code=r.status_code, token=CONFIG.get('api_token')))
+        elif r.status_code == 404:
+            logger.error(
+                "Received {code} HTTP status code. Most likely "
+                "a wrong Server URL in config ({url})."
+                .format(code=r.status_code, url=CONFIG.get('server_url')))
+        else:
+            logger.error("Received unexcpected {code} HTTP status code."
+                         .format(code=r.status_code))
+            raise
+    except Exception as e:
+        logger.error("Unhandled Exception while requesting data.")
+        logger.exception(e)
+        raise
+    else:
+        return r.json()
+
+
+def import_path(name, failsafe=False):
+    """ import a callable from full module.callable name """
+    def _imp(name):
+        modname, __, attr = name.rpartition('.')
+        if not modname:
+            # single module name
+            return __import__(attr)
+        m = __import__(modname, fromlist=[str(attr)])
+        return getattr(m, attr)
+    try:
+        return _imp(name)
+    except (ImportError, AttributeError) as exp:
+        # logger.debug("Failed to import {}: {}".format(name, exp))
+        if failsafe:
+            return None
+        raise exp
