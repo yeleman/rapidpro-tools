@@ -48,10 +48,9 @@ def main(arguments):
         if not callable(func):
             logger.error("You func path is not callable `{}`"
                          .format(options['module']))
-        return 1
+            return 1
 
-    if debug:
-        logger.debug("Options: {}".format(options))
+    logger.debug("Options: {}".format(options))
 
     logger.info("Looping through {} contacts with {}"
                 .format(contacts.find().count(), func))
