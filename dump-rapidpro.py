@@ -90,7 +90,7 @@ def dump_relayers(**options):
                           data=relayers_list,
                           id_field='relayer')
 
-    logger.info("Updated Contacts completed. Now have {} relayers in DB."
+    logger.info("Updated Relayers completed. Now have {} relayers in DB."
                 .format(relayers.count()))
 
 
@@ -102,9 +102,10 @@ def dump_messages(**options):
     if options.get('after'):
         params.update({'after': options.get('after')})
     elif options.get('resume'):
-        params.update({
-            'after': meta.find_one({
-                'endpoint': 'messages'}).get('updated_on')})
+        if meta.find_one({'endpoint': 'messages'}) is not None:
+            params.update({
+                'after': meta.find_one({
+                    'endpoint': 'messages'}).get('updated_on')})
 
     # call messages API
     messages_list = get_api_data('/messages.json', **params)
@@ -119,7 +120,7 @@ def dump_messages(**options):
                           data=messages_list,
                           id_field='id')
 
-    logger.info("Updated Contacts completed. Now have {} messages in DB."
+    logger.info("Updated Messages completed. Now have {} messages in DB."
                 .format(messages.count()))
 
 
