@@ -56,10 +56,10 @@ def price_for_others(month_data):
 ORANGE = 417
 MALITEL = 485
 
-RELAYERS = {
-    ORANGE: ("orange", price_for_orange),
-    MALITEL: ("malitel", price_for_malitel)
-}
+RELAYERS = OrderedDict([
+    (ORANGE, ("orange", price_for_orange)),
+    (MALITEL, ("malitel", price_for_malitel))
+])
 
 
 def percent(pc_value):
@@ -152,7 +152,7 @@ def main(arguments):
         with open(os.path.join(json_folder, '{}.json'.format(key)), 'r') as f:
             return OrderedDict(sorted(json.load(f).items(), key=tssort))
     daily_data = {
-        key: loadjs(key) for key in statistics.keys()
+        key: loadjs(key) for key in sorted(statistics.keys())
         if key not in ('total', 'relayers')
     }
 
@@ -178,8 +178,9 @@ def main(arguments):
         'update_time': datetime_from_iso(
             statistics['total']['update_time']).strftime('%d %B %Y, %Hh%I'),
         'relayers': statistics['relayers'],
-        'months_data': {k: v for k, v in statistics.items()
-                        if k != 'relayers'},
+        'months_data': OrderedDict([
+            (k, v) for k, v in sorted(statistics.items(), reverse=True)
+            if k != 'relayers']),
         'daily_data': daily_data,
         'cumulative': cumulative,
         'fields': fields,
