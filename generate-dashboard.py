@@ -177,7 +177,8 @@ def main(arguments):
     context = {
         'update_time': datetime_from_iso(
             statistics['total']['update_time']).strftime('%d %B %Y, %Hh%I'),
-        'relayers': statistics['relayers'],
+        'relayers': OrderedDict(sorted(statistics['relayers'].items(),
+                                       key=lambda x: x[1]['relayer'])),
         'months_data': OrderedDict([
             (k, v) for k, v in sorted(statistics.items(), reverse=True)
             if k != 'relayers']),
