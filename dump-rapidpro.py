@@ -90,7 +90,7 @@ def dump_relayers(**options):
                           data=relayers_list,
                           id_field='relayer')
 
-    logger.info("Updated Contacts completed. Now have {} relayers in DB."
+    logger.info("Updated Relayers completed. Now have {} relayers in DB."
                 .format(relayers.count()))
 
 
@@ -120,7 +120,7 @@ def dump_messages(**options):
                           data=messages_list,
                           id_field='id')
 
-    logger.info("Updated Contacts completed. Now have {} messages in DB."
+    logger.info("Updated Messages completed. Now have {} messages in DB."
                 .format(messages.count()))
 
 
