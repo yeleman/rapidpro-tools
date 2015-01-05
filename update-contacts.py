@@ -57,9 +57,6 @@ def main(arguments):
     updated = 0
     for contact in contacts.find():
 
-        if contact['name'] != 'Reg':
-            continue
-
         logger.debug("{}/{}".format(contact['phone'], contact['name']))
 
         if func(contact):
