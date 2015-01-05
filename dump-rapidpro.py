@@ -102,9 +102,10 @@ def dump_messages(**options):
     if options.get('after'):
         params.update({'after': options.get('after')})
     elif options.get('resume'):
-        params.update({
-            'after': meta.find_one({
-                'endpoint': 'messages'}).get('updated_on')})
+        if meta.find_one({'endpoint': 'messages'}) is not None:
+            params.update({
+                'after': meta.find_one({
+                    'endpoint': 'messages'}).get('updated_on')})
 
     # call messages API
     messages_list = get_api_data('/messages.json', **params)
