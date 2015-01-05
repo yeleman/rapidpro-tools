@@ -119,7 +119,7 @@ def statistics_for(period):
     for relayer_id in relayer_ids:
         relayer_query = dup(query, {'relayer': relayer_id})
         relayer_query_in = dup(relayer_query, {'direction': 'I'})
-        relayer_query_out = dup(relayer_query, {'direction': 'I'})
+        relayer_query_out = dup(relayer_query, {'direction': 'O'})
         filtered = messages.find(relayer_query)
 
         # messages are straight numbers from rapidpro
