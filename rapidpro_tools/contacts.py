@@ -5,9 +5,19 @@
 from __future__ import (unicode_literals, absolute_import,
                         division, print_function)
 
-# from rapidpro_tools import logger
+from py3compat import PY2
+
+from rapidpro_tools import logger
 from rapidpro_tools.mongo import contacts
 from rapidpro_tools.utils import post_api_data
+
+if PY2:
+    import unicodecsv as csv
+else:
+    import csv
+
+NAME_OK_FIELD = '_name_is_ok'
+CSV_HEADERS = ['uuid', 'is_ok', 'name']
 
 
 def update_contact(contact, fields=None, name=None, groups=None):
@@ -34,3 +44,40 @@ def update_contact(contact, fields=None, name=None, groups=None):
     contacts.save(contact)
 
     return contact
+
+
+def export_contact_names_to(afile):
+    csv_writer = csv.DictWriter(afile, CSV_HEADERS)
+    csv_writer.writeheader()
+
+    query = {NAME_OK_FIELD: {'$exists': False}}
+    for contact in contacts.find(query, {'uuid': True, 'name': True}):
+        csv_writer.writerow({
+            'uuid': contact.get('uuid'),
+            'name': contact.get('name') or "",
+            'is_ok': contact.get(NAME_OK_FIELD) or ""
+        })
+
+
+def fix_contact_names_from(afile):
+    csv_reader = csv.DictReader(afile, CSV_HEADERS)
+
+    for entry in csv_reader:
+        if csv_reader.line_num == 1:
+            continue
+
+        if not entry.get('is_ok') or not entry.get('uuid'):
+            continue
+
+        uuid = entry.get('uuid').strip()
+
+        try:
+            name = entry.get('name').strip() or None
+        except:
+            name = None
+
+        contact = contacts.find_one({'uuid': uuid})
+        if contact['name'] != name:
+            logger.info("Updating {}: {}".format(uuid, name))
+
+            update_contact(contact=contact, name=name)
