@@ -54,3 +54,6 @@ docs/_build/
 target/
 
 config.json
+*.csv
+*.json
+dashboard.html
