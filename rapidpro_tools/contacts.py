@@ -77,4 +77,4 @@ def fix_contact_names_from(afile):
         if contact['name'] != name:
             logger.info("Updating {}: {}".format(uuid, name))
 
-            update_contact(contact=contact, name=name, force_update_name=True)
+            update_contact(contact=contact, name=name)
