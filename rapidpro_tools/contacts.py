@@ -20,12 +20,11 @@ NAME_OK_FIELD = '_name_is_ok'
 CSV_HEADERS = ['uuid', 'is_ok', 'name']
 
 
-def update_contact(contact, fields=None, name=None, groups=None,
-                   force_update_name=False):
+def update_contact(contact, fields=None, name=None, groups=None):
 
     update_dict = {'urns': contact['urns']}
 
-    if name is not None or force_update_name:
+    if name is not None:
         update_dict.update({'name': name})
 
     if fields is not None:
@@ -72,10 +71,7 @@ def fix_contact_names_from(afile):
 
         uuid = entry.get('uuid').strip()
 
-        try:
-            name = entry.get('name').strip() or None
-        except:
-            name = None
+        name = entry.get('name').strip() or ""
 
         contact = contacts.find_one({'uuid': uuid})
         if contact['name'] != name:
