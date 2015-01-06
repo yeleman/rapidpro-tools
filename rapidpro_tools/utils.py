@@ -7,6 +7,7 @@ from __future__ import (unicode_literals, absolute_import,
 import math
 import datetime
 import json
+import re
 
 import iso8601
 import requests
@@ -190,3 +191,8 @@ def import_path(name, failsafe=False):
         if failsafe:
             return None
         raise exp
+
+
+def phone_to_name(phone):
+    return " ".join(
+        [p for p in re.split(r'([0-9]{2})', phone.replace('+223', '')) if p])

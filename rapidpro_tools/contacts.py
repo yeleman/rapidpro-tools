@@ -9,7 +9,7 @@ from py3compat import PY2
 
 from rapidpro_tools import logger
 from rapidpro_tools.mongo import contacts
-from rapidpro_tools.utils import post_api_data
+from rapidpro_tools.utils import post_api_data, phone_to_name
 
 if PY2:
     import unicodecsv as csv
@@ -74,6 +74,11 @@ def fix_contact_names_from(afile):
         name = entry.get('name').strip() or ""
 
         contact = contacts.find_one({'uuid': uuid})
+
+        # rapidpro doesn't update contact if name is empty
+        if not name:
+            name = phone_to_name(contact.get('phone'))
+
         if contact['name'] != name:
             logger.info("Updating {}: {}".format(uuid, name))
 
