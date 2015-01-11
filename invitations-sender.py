@@ -24,7 +24,7 @@ def remove_number(number):
 
 def send_invitation(relayer, number_list):
     max_num = 100
-    for it in range(0, math.ceil(len(number_list) // max_num)):
+    for it in range(0, int(math.ceil(len(number_list) / max_num))):
         step = it * max_num
         chunk = number_list[step:step + max_num]
 
