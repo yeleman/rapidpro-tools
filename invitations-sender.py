@@ -38,7 +38,7 @@ def send_invitation(relayer, number_list):
             'text': "Bonjour, tu es invité à rejoindre U-report pour partager "
                     "tes opinions avec la jeunesse malienne. Pour t'inscrire, "
                     "envoie \"MALI\" au 36019. C'est 100% gratuit.",
-            'relayer': relayer
+            'channel': relayer
         })
 
 
