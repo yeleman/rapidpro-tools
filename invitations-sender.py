@@ -66,11 +66,11 @@ def main():
 
     logger.info("Sending {} invitations to Orange users..."
                 .format(len(to_send[ORANGE])))
-    send_invitation(to_send[ORANGE])
+    send_invitation(ORANGE, to_send[ORANGE])
 
     logger.info("Sending {} invitations to Malitel users..."
                 .format(len(to_send[MALITEL])))
-    send_invitation(to_send[MALITEL])
+    send_invitation(MALITEL, to_send[MALITEL])
 
 if __name__ == '__main__':
     main()
