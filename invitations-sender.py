@@ -26,9 +26,9 @@ def remove_number(number):
 
 
 def send_invitation(relayer, number_list):
-    max_num = 100.0
-    for it in range(0, int(math.ceil(len(number_list) / max_num))):
-        step = it * max_num
+    max_num = 100
+    for it in range(0, int(math.ceil(len(number_list) / float(max_num)))):
+        step = int(it * max_num)
         chunk = number_list[step:step + max_num]
 
         logger.info(".. sending {} invitations at once.".format(len(chunk)))
