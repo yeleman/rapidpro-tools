@@ -15,7 +15,10 @@ numbers = db['numbers']
 
 
 def is_ureporter(number):
-    return bool(contacts.find({'phone': "+223{}".format(number)}).count())
+    query = {'phone': "+223{}".format(number)}
+    if not contacts.find(query).count():
+        return False
+    return bool(len(contacts.find_one(query)['groups']))
 
 
 def remove_number(number):
@@ -23,7 +26,7 @@ def remove_number(number):
 
 
 def send_invitation(relayer, number_list):
-    max_num = 100
+    max_num = 100.0
     for it in range(0, int(math.ceil(len(number_list) / max_num))):
         step = it * max_num
         chunk = number_list[step:step + max_num]
