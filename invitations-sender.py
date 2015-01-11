@@ -19,7 +19,7 @@ def is_ureporter(number):
 
 
 def remove_number(number):
-    return numbers.delete({'number': number})
+    return numbers.remove({'number': number})
 
 
 def send_invitation(relayer, number_list):
