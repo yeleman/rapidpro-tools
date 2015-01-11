@@ -8,7 +8,7 @@ from __future__ import (unicode_literals, absolute_import,
 import cherrypy
 from rapidpro_tools import logger
 from rapidpro_tools.mongo import db
-from rapidpro_tools_mali import clean_number
+from rapidpro_mali import clean_number
 
 numbers = db['numbers']
 
