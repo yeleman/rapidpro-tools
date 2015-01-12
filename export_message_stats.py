@@ -89,7 +89,7 @@ def statistics_for(period):
         d.update(bdict)
         return d
 
-    query = query_dict_for(period)
+    query = dup({'status': {'$ne': 'F'}}, query_dict_for(period))
     query_in = dup(query, {'direction': 'I'})
     query_out = dup(query, {'direction': 'O'})
     period_messages = messages.find(query)
