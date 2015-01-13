@@ -16,9 +16,12 @@ numbers = db['numbers']
 
 def is_ureporter(number):
     query = {'phone': "+223{}".format(number)}
-    if not contacts.find(query).count():
-        return False
-    return bool(len(contacts.find_one(query)['groups']))
+
+    # was used to resend invit to failed (wrong channel) outgoing messages
+    # if not contacts.find(query).count():
+    #     return False
+    # return bool(len(contacts.find_one(query)['groups']))
+    return contacts.find(query).count()
 
 
 def remove_number(number):
