@@ -70,13 +70,13 @@ def ucontact_states(contact):
 def relayer_from_number(num):
     if num[0] in ('7', '8'):
         return ORANGE
-    if num[0] in ('9',) and num[1] in ('1', '2', '3', '4', '5'):
+    if num[0] in ('9',) and num[1] in ('0', '1', '2', '3', '4'):
         return ORANGE
 
     if num[0] in ('6',):
         return MALITEL
 
-    if num[0] in ('9',) and num[1] in ('6', '7', '8', '9'):
+    if num[0] in ('9',) and num[1] in ('5', '6', '7', '8', '9'):
         return MALITEL
 
     return

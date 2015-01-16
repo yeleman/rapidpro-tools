@@ -11,6 +11,9 @@ from rapidpro_tools.mongo import db, contacts
 from rapidpro_tools.utils import post_api_data
 from rapidpro_mali import ORANGE, MALITEL, relayer_from_number
 
+INVIT_TEXT = ("Bonjour, tu es invité à rejoindre U-report pour partager "
+              "tes opinions avec la jeunesse malienne. Pour t'inscrire, "
+              "envoie \"MALI\" au 36019. C'est 100% gratuit.")
 numbers = db['numbers']
 
 
@@ -38,9 +41,7 @@ def send_invitation(relayer, number_list):
 
         post_api_data('/messages.json', {
             'phone': ["+223{}".format(num) for num in chunk],
-            'text': "Bonjour, tu es invité à rejoindre U-report pour partager "
-                    "tes opinions avec la jeunesse malienne. Pour t'inscrire, "
-                    "envoie \"MALI\" au 36019. C'est 100% gratuit.",
+            'text': INVIT_TEXT,
             'channel': relayer
         })
 
