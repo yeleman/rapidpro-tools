@@ -176,7 +176,8 @@ def main(arguments):
     # prepare context
     context = {
         'update_time': datetime_from_iso(
-            statistics['total']['update_time']).strftime('%d %B %Y, %Hh%I'),
+            statistics['total']['update_time']).strftime('%d %B %Y, %Hh%I')
+                                               .decode('utf-8'),
         'relayers': OrderedDict(sorted(statistics['relayers'].items(),
                                        key=lambda x: x[1]['relayer'])),
         'months_data': OrderedDict([
