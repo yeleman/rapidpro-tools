@@ -22,7 +22,8 @@ CSV_HEADERS = ['uuid', 'is_ok', 'name']
 
 def update_contact(contact, fields=None, name=None, groups=None):
 
-    update_dict = {'urns': contact['urns']}
+    # update_dict = {'urns': contact['urns']}
+    update_dict = {'uuid': contact['uuid']}
 
     if name is not None:
         update_dict.update({'name': name})

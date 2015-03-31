@@ -5,7 +5,10 @@
 from __future__ import (unicode_literals, absolute_import,
                         division, print_function)
 import re
+import datetime
+from itertools import combinations
 
+from rapidpro_tools import logger
 from rapidpro_tools.contacts import update_contact
 
 MALITEL = 485
@@ -20,6 +23,70 @@ SEGOU = "Ségou"
 SIKASSO = "Sikasso"
 TBKT = "Tombouctou"
 KIDAL = "Kidal"
+
+PROFILE_FIELDS = [
+    "Date de naissance",  # U-Reporter Jeunes / U-Reporer Adultes
+    "Sexe",  # U-Reporer Hommes / U-Reporter Femmes
+    "Region",  # District de Bamako, Gao, Kayes, Koulikoro, Mopti,
+               # Ségou, Sikasso, Tombouctou, Kidal
+    "Milieu",  # Ville / Village
+    "Activite",  # Etudiant / Travaille / Sans Activité
+]
+
+groups = {
+    "Age: Moins de 20 ans":
+        lambda c: int(c["fields"]["born"]) >=
+        (datetime.datetime.today().year - 20),
+    "Age: 20-30 ans":
+        lambda c: int(c["fields"]["born"]) in range(
+            datetime.datetime.today().year - 30,
+            datetime.datetime.today().year - 20),
+    "Age: 30-40 ans":
+        lambda c: int(c["fields"]["born"]) in range(
+            datetime.datetime.today().year - 40,
+            datetime.datetime.today().year - 30),
+    "Age: 40-50 ans":
+        lambda c: int(c["fields"]["born"]) in range(
+            datetime.datetime.today().year - 50,
+            datetime.datetime.today().year - 40),
+    "Age: n/a":
+        lambda c: not c["fields"]["born"].isdigit(),
+
+    "Sexe: Hommes": lambda c: c["fields"]["gender"] == "Homme",
+    "Sexe: Femmes": lambda c: c["fields"]["gender"] == "Femme",
+    "Sexe: n/a": lambda c: c["fields"]["gender"] not in ("Homme", "Femme"),
+
+    "Milieu: Village": lambda c: c["fields"]["milieu"] == "Village",
+    "Milieu: Ville": lambda c: c["fields"]["milieu"] == "Ville",
+    "Milieu: n/a": lambda c: c["fields"]["milieu"] not in ("Ville", "Village"),
+
+    "Activité: Étudiant": lambda c: c["fields"]["activit"] == "Etudiant",
+    "Activité: Travaille": lambda c: c["fields"]["activit"] == "Travaille",
+    "Activité: Sans activité":
+        lambda c: c["fields"]["activit"] == "Sans Activité",
+    "Activité: n/a":
+        lambda c: c["fields"]["activit"] not in (
+            "Etudiant", "Travaille", "Sans Activité"),
+    "Région: Bamako": lambda c: c["fields"]["state"] == "District de Bamako",
+    "Région: Gao": lambda c: c["fields"]["state"] == "Gao",
+    "Région: Kayes": lambda c: c["fields"]["state"] == "Kayes",
+    "Région: Koulikoro": lambda c: c["fields"]["state"] == "Koulikoro",
+    "Région: Mopti": lambda c: c["fields"]["state"] == "Mopti",
+    "Région: Ségou": lambda c: c["fields"]["state"] == "Ségou",
+    "Région: Sikasso": lambda c: c["fields"]["state"] == "Sikasso",
+    "Région: Tombouctou": lambda c: c["fields"]["state"] == "Tombouctou",
+    "Région: Kidal": lambda c: c["fields"]["state"] == "Kidal",
+    "Région: n/a": lambda c: c["fields"]["state"] not in (
+        "District de Bamako", "Gao", "Kayes", "Koulikoro", "Mopti",
+        "Ségou", "Sikasso", "Tombouctou", "Kidal")
+}
+
+
+def match_group(contact, group_name):
+    try:
+        return groups.get(group_name)(contact)
+    except:
+        return False
 
 
 def ucontact_states(contact):
@@ -106,3 +173,38 @@ def clean_number(num):
         return
 
     return num
+
+
+def update_groups(contact, remove_others=False):
+    if remove_others:
+        cgroups = []
+    else:
+        cgroups = contact['groups']
+
+    # default group for all with a gender
+    default_group = "U-Reporters"
+    if contact["fields"].get("gender", None) in ("Homme", "Femme"):
+        if default_group not in cgroups:
+            cgroups.append(default_group)
+
+    # cartesian product ** (no duplicate combination) of all groups
+    all_groups = combinations(groups.keys(), 2)
+
+    def handle_group(group_name, force_match=False):
+        if force_match or match_group(contact=contact, group_name=group_name):
+            if group_name in cgroups:
+                pass
+            else:
+                cgroups.append(group_name)
+            return True
+        else:
+            if group_name in cgroups:
+                cgroups.remove(group_name)
+            return False
+
+    for groupa_name, groupb_name in all_groups:
+        if handle_group(groupa_name) and handle_group(groupb_name):
+            groupc_name = "{} - {}".format(groupa_name, groupb_name)
+            handle_group(groupc_name, force_match=True)
+
+    update_contact(contact=contact, groups=cgroups)

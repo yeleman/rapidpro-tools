@@ -117,7 +117,7 @@ def get_api_data(url_or_path, **params):
         url, "&".join(["{key}={val}".format(key=key, val=val)
                        for key, val in params.items()])))
     try:
-        r = requests.get(url=url, headers=headers, params=params, timeout=6)
+        r = requests.get(url=url, headers=headers, params=params, timeout=30)
         assert r.status_code == requests.codes.ok
     except AssertionError:
         if r.status_code in (403, 401):
@@ -150,7 +150,7 @@ def post_api_data(url_or_path, payload):
     logger.debug("URL: {}".format(url))
     try:
         r = requests.post(url=url, headers=headers,
-                          data=json.dumps(payload), timeout=6)
+                          data=json.dumps(payload), timeout=30)
         assert r.status_code in (200, 201)
     except AssertionError:
         if r.status_code in (403, 401):
