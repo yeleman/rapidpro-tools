@@ -9,7 +9,8 @@ import datetime
 from docopt import docopt
 
 from rapidpro_tools import logger, change_logging_level
-from rapidpro_tools.mongo import meta, contacts, relayers, messages
+from rapidpro_tools.mongo import (meta, contacts, relayers, messages, runs,
+                                  flows, fields)
 from rapidpro_tools.utils import get_api_data
 
 help = ("""Usage: dump-rapidpro.py [-v] [-h] [-z] [-a after] [--messages] """
@@ -124,6 +125,84 @@ def dump_messages(**options):
                 .format(messages.count()))
 
 
+def dump_fields(**options):
+    logger.info("Updating Fields. Currently have {} fields in DB."
+                .format(fields.count()))
+
+    # call fields API
+    fields_list = get_api_data('/fields.json')
+    update_collection(collection=fields,
+                      data=fields_list,
+                      id_field='key')
+
+    # loop through potential next pages
+    while fields_list.get('next'):
+        fields_list = get_api_data(fields_list.get('next'))
+        update_collection(collection=fields,
+                          data=fields_list,
+                          id_field='key')
+
+    logger.info("Updated Fields completed. Now have {} fields in DB."
+                .format(fields.count()))
+
+
+def dump_flows(**options):
+    logger.info("Updating Flows. Currently have {} flows in DB."
+                .format(flows.count()))
+
+    params = {}
+    if options.get('after'):
+        params.update({'after': options.get('after')})
+    elif options.get('resume'):
+        if meta.find_one({'endpoint': 'flows'}) is not None:
+            params.update({
+                'after': meta.find_one({
+                    'endpoint': 'flows'}).get('updated_on')})
+
+    # call flows API
+    flows_list = get_api_data('/flows.json', **params)
+    update_collection(collection=flows,
+                      data=flows_list,
+                      id_field='uuid')
+
+    # loop through potential next pages
+    while flows_list.get('next'):
+        flows_list = get_api_data(flows_list.get('next'))
+        update_collection(collection=flows,
+                          data=flows_list,
+                          id_field='uuid')
+
+
+def dump_runs(**options):
+    logger.info("Updating Runs. Currently have {} contacts in DB."
+                .format(runs.count()))
+
+    params = {}
+    if options.get('after'):
+        params.update({'after': options.get('after')})
+    elif options.get('resume'):
+        if meta.find_one({'endpoint': 'runs'}) is not None:
+            params.update({
+                'after': meta.find_one({
+                    'endpoint': 'runs'}).get('updated_on')})
+
+    # call runs API
+    runs_list = get_api_data('/runs.json', **params)
+    update_collection(collection=runs,
+                      data=runs_list,
+                      id_field='uuid')
+
+    # loop through potential next pages
+    while runs_list.get('next'):
+        runs_list = get_api_data(runs_list.get('next'))
+        update_collection(collection=runs,
+                          data=runs_list,
+                          id_field='uuid')
+
+    logger.info("Updated Runs completed. Now have {} runs in DB."
+                .format(runs.count()))
+
+
 def main(arguments):
     debug = arguments.get('--verbose') or False
     change_logging_level(debug)
@@ -139,8 +218,12 @@ def main(arguments):
     do_contacts = arguments.get('--contacts', False)
     do_messages = arguments.get('--messages', False)
     do_relayers = arguments.get('--relayers', False)
+    do_fields = arguments.get('--fields', False)
+    do_flows = arguments.get('--flows', False)
+    do_runs = arguments.get('--runs', False)
 
-    if not (do_contacts or do_messages or do_relayers):
+    if not (do_contacts or do_messages or do_relayers
+            or do_fields or do_flows or do_runs):
         logger.error("You need to specify at least one action")
         return 1
 
@@ -161,6 +244,18 @@ def main(arguments):
     if do_messages:
         dump_messages(**options)
         update_meta('messages', now_str)
+
+    if do_fields:
+        dump_fields(**options)
+        update_meta('fields', now_str)
+
+    if do_flows:
+        dump_flows(**options)
+        update_meta('flows', now_str)
+
+    if do_runs:
+        dump_runs(**options)
+        update_meta('runs', now_str)
 
     logger.info("-- All done. :)")
 
