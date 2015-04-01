@@ -14,7 +14,7 @@ from rapidpro_tools.mongo import (meta, contacts, relayers, messages, runs,
 from rapidpro_tools.utils import get_api_data
 
 help = ("""Usage: dump-rapidpro.py [-v] [-h] [-z] [-a after] [--messages] """
-        """[--contacts] [--relayers]
+        """[--contacts] [--relayers] [--fields] [--flows] [--runs]
 
 -h --help                       Display this help message
 -v --verbose                    Display DEBUG messages
