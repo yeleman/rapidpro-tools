@@ -8,7 +8,6 @@ import re
 import datetime
 from itertools import combinations
 
-from rapidpro_tools import logger
 from rapidpro_tools.contacts import update_contact
 
 MALITEL = 485
@@ -181,11 +180,14 @@ def update_groups(contact, remove_others=False):
     else:
         cgroups = contact['groups']
 
-    # default group for all with a gender
+    # default group for all with a registration date (started reg flow)
     default_group = "U-Reporters"
-    if contact["fields"].get("gender", None) in ("Homme", "Femme"):
+    if contact['fields'].get('registration_date', None):
         if default_group not in cgroups:
             cgroups.append(default_group)
+    else:
+        if default_group in cgroups:
+            cgroups.remove(default_group)
 
     # cartesian product ** (no duplicate combination) of all groups
     all_groups = combinations(groups.keys(), 2)
