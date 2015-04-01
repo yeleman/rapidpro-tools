@@ -24,6 +24,9 @@ help = ("""Usage: dump-rapidpro.py [-v] [-h] [-z] [-a after] [--messages] """
 --relayers                      Dumps all relayers
 --contacts                      Dumps all contacts
 --messages                      Dumps all messages
+--flows                         Dumps all flows
+--fields                        Dumps all fields
+--runs                          Dumps all runs
 
 This script dumps JSON data from a rapidpro instance into mongo """)
 
