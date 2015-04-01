@@ -17,6 +17,7 @@ from rapidpro_tools import CONFIG, logger
 UTC = iso8601.iso8601.Utc()
 ASCII_MAX_CHARS = 160
 UNICODE_MAX_CHARS = 72
+TIMEOUT = 120
 
 jsdthandler = lambda obj: obj.isoformat() \
     if isinstance(obj, datetime.datetime) \
@@ -117,7 +118,8 @@ def get_api_data(url_or_path, **params):
         url, "&".join(["{key}={val}".format(key=key, val=val)
                        for key, val in params.items()])))
     try:
-        r = requests.get(url=url, headers=headers, params=params, timeout=30)
+        r = requests.get(url=url, headers=headers, params=params,
+                         timeout=TIMEOUT)
         assert r.status_code == requests.codes.ok
     except AssertionError:
         if r.status_code in (403, 401):
@@ -150,7 +152,7 @@ def post_api_data(url_or_path, payload):
     logger.debug("URL: {}".format(url))
     try:
         r = requests.post(url=url, headers=headers,
-                          data=json.dumps(payload), timeout=30)
+                          data=json.dumps(payload), timeout=TIMEOUT)
         assert r.status_code in (200, 201)
     except AssertionError:
         if r.status_code in (403, 401):

@@ -177,7 +177,7 @@ def dump_flows(**options):
 
 
 def dump_runs(**options):
-    logger.info("Updating Runs. Currently have {} contacts in DB."
+    logger.info("Updating Runs. Currently have {} runs in DB."
                 .format(runs.count()))
 
     params = {}
