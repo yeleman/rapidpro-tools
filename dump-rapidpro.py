@@ -193,14 +193,14 @@ def dump_runs(**options):
     runs_list = get_api_data('/runs.json', **params)
     update_collection(collection=runs,
                       data=runs_list,
-                      id_field='uuid')
+                      id_field='run')
 
     # loop through potential next pages
     while runs_list.get('next'):
         runs_list = get_api_data(runs_list.get('next'))
         update_collection(collection=runs,
                           data=runs_list,
-                          id_field='uuid')
+                          id_field='run')
 
     logger.info("Updated Runs completed. Now have {} runs in DB."
                 .format(runs.count()))
